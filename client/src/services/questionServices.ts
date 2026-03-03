@@ -22,3 +22,8 @@ export const fetchQuestions = async (params?: Record<string, string>) => {
   const { data } = await axios.get<QuestionsResponse>('/api/questions', { params });
   return data.questions;
 };
+
+export const fetchDemoQuestions = async () => {
+  const { data } = await axios.get<QuestionsResponse>('/api/questions/demo');
+  return data.questions;
+};

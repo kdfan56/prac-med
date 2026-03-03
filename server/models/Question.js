@@ -55,6 +55,10 @@ const questionSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    isDemo: {
+      type: Boolean,
+      default: false,
+    },
     isActive: {
       type: Boolean,
       default: true,
@@ -64,5 +68,6 @@ const questionSchema = new mongoose.Schema(
 );
 
 questionSchema.index({ category: 1, subCategory: 1, source: 1, chapter: 1, isActive: 1 });
+questionSchema.index({ isDemo: 1, isActive: 1 });
 
 module.exports = mongoose.model('Question', questionSchema);

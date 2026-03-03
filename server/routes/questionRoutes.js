@@ -1,6 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const { getQuestions, seedQuestions } = require('../controllers/questionController');
+const { getQuestions, getDemoQuestions, seedQuestions } = require('../controllers/questionController');
+
+// GET  /api/questions/demo  — public, no auth
+router.get('/demo', getDemoQuestions);
 
 // GET  /api/questions?category=...&subCategory=...&source=...&chapter=...&limit=10
 router.get('/', getQuestions);

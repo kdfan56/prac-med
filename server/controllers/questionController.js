@@ -1,5 +1,18 @@
 const Question = require('../models/Question');
 
+// @desc    Get demo questions (no auth required)
+// @route   GET /api/questions/demo
+// @access  Public
+const getDemoQuestions = async (req, res) => {
+  try {
+    const questions = await Question.find({ isDemo: true, isActive: true });
+    res.json({ count: questions.length, questions });
+  } catch (error) {
+    console.error('Error fetching demo questions:', error.message);
+    res.status(500).json({ message: 'Server error fetching demo questions' });
+  }
+};
+
 // @desc    Get randomized questions with optional filters
 // @route   GET /api/questions
 // @access  Public
@@ -8,7 +21,7 @@ const getQuestions = async (req, res) => {
     const { category, subCategory, source, chapter, limit } = req.query;
 
     // Build the $match stage dynamically from query params
-    const matchStage = { isActive: true };
+    const matchStage = { isActive: true, isDemo: false };
 
     if (category) matchStage.category = category;
     if (subCategory) matchStage.subCategory = subCategory;
@@ -41,61 +54,104 @@ const seedQuestions = async (req, res) => {
       {
         category: 'MRCS Part A',
         subCategory: 'ENT',
-        source: "Bailey's ENT MCQ BOOK",
-        chapter: 'Ch 1: Basic Science',
-        stem: 'A 35-year-old man presents with progressive unilateral hearing loss over 6 months. Audiometry reveals a sensorineural pattern with speech discrimination disproportionately worse than the pure tone average. Weber test lateralises to the contralateral ear and Rinne is positive bilaterally. MRI with gadolinium shows a 1.5 cm enhancing mass at the cerebellopontine angle. Which of the following is the most likely cell of origin for this tumour?',
+        source: 'Dhingra',
+        chapter: 'Otology',
+        stem: 'A patient diagnosed with Ménière\'s disease presents to the ENT outpatient department. In addition to standard medical therapy, which of the following minerals is most appropriate to be added to the treatment plan?',
         options: [
-          'Astrocytes of the vestibulocochlear nerve',
-          'Schwann cells of the vestibular division of CN VIII',
-          'Arachnoid cap cells of the meninges',
-          'Oligodendrocytes of the cochlear nerve',
-          'Fibroblasts of the internal auditory meatus',
+          'Zinc',
+          'Selenium',
+          'Manganese',
+          'Magnesium',
+          'Calcium',
         ],
-        correctAnswer: 'Schwann cells of the vestibular division of CN VIII',
+        correctAnswer: 'Magnesium',
         rationale:
-          "The clinical and radiological findings are classic for a vestibular schwannoma (acoustic neuroma). Despite the name, these tumours arise from Schwann cells — specifically those of the vestibular division of cranial nerve VIII, not the cochlear division. They are the most common cerebellopontine angle tumour (~80%). Meningiomas arise from arachnoid cap cells and are the second most common CPA tumour but typically have a dural tail on MRI. Astrocytes and oligodendrocytes are CNS glial cells and do not produce peripheral nerve sheath tumours. Fibroblasts may contribute to neurofibromas but are not the primary cell of origin for schwannomas.",
+          'Although mineral supplementation has no established role in most studies and standard textbooks for the management of Ménière\'s disease, NHS guidance and a few studies suggest a possible adjunctive role for magnesium. Among the given options, magnesium is the most appropriate choice, as the other minerals have no documented role at all in the management of Ménière\'s disease.',
         highYieldSummary:
-          'Vestibular schwannoma: arises from Schwann cells of the VESTIBULAR (not cochlear) division of CN VIII. Most common CPA tumour. Associated with NF2 when bilateral. Classic triad: unilateral SNHL + tinnitus + disequilibrium. Gold-standard investigation: MRI with gadolinium. Treatment options: observation, stereotactic radiosurgery, or microsurgical excision.',
+          'Ménière\'s disease triad: episodic vertigo + sensorineural hearing loss + tinnitus (± aural fullness). Management: low-salt diet, betahistine, thiazide diuretics. Magnesium may have an adjunctive role per NHS guidance. Refractory cases: intratympanic gentamicin or dexamethasone, endolymphatic sac decompression.',
+        isDemo: true,
         isActive: true,
       },
       {
         category: 'MRCS Part A',
         subCategory: 'ENT',
-        source: "Bailey's ENT MCQ BOOK",
-        chapter: 'Ch 2: Rhinology and Allergy',
-        stem: 'A 42-year-old woman with a history of asthma and aspirin sensitivity presents with bilateral nasal obstruction, anosmia, and thick mucopurulent nasal discharge for over 12 weeks. CT sinuses shows bilateral pan-sinus opacification with expansion of the ethmoid sinuses. Nasal endoscopy reveals bilateral nasal polyps filling both nasal cavities. Which of the following best describes the underlying immunological mechanism driving polyp formation in this patient?',
+        source: 'Dhingra',
+        chapter: 'Otology',
+        stem: 'A patient with temporal bone fracture presents with facial nerve palsy. Which of the following is an indication for surgical exploration of the facial nerve?',
         options: [
-          'Type I (IgE-mediated) hypersensitivity with eosinophilic infiltration',
-          'Type III (immune complex-mediated) vasculitis of the nasal mucosa',
-          'Type IV (delayed-type) hypersensitivity driven by Th1 lymphocytes',
-          'Type II (antibody-mediated cytotoxic) reaction against nasal epithelium',
-          'Non-immunological autonomic dysfunction of the nasal vasculature',
+          'Incomplete immediate facial palsy',
+          'Delayed incomplete facial palsy',
+          'ENoG showing more than 90% degeneration',
+          'EMG showing polyphasic potentials',
+          'Severe vertigo',
         ],
-        correctAnswer: 'Type I (IgE-mediated) hypersensitivity with eosinophilic infiltration',
+        correctAnswer: 'ENoG showing more than 90% degeneration',
         rationale:
-          "This patient has Samter's triad (aspirin-exacerbated respiratory disease): asthma, aspirin sensitivity, and nasal polyposis. Nasal polyps in this context are driven by a Type 2 inflammatory response characterised by IgE-mediated (Type I) hypersensitivity with marked eosinophilic infiltration. The pathophysiology involves dysregulation of arachidonic acid metabolism — aspirin inhibits COX-1, shunting substrates toward the lipoxygenase pathway, leading to excessive cysteinyl leukotriene production. This drives eosinophil recruitment and mucosal oedema. Type III reactions involve immune complexes and are seen in conditions like post-streptococcal GN. Type IV reactions are T-cell mediated (e.g. contact dermatitis, TB). Type II reactions involve antibody-mediated cell destruction (e.g. autoimmune haemolytic anaemia).",
+          'Facial nerve exploration in temporal bone fracture is indicated in immediate complete palsy or when ENoG shows more than 90% degeneration. Incomplete or delayed palsy is generally managed conservatively with steroids and observation. Polyphasic potentials on EMG suggest nerve regeneration (a good prognostic sign). Severe vertigo alone is not an indication for facial nerve exploration.',
         highYieldSummary:
-          "Samter's triad: asthma + aspirin sensitivity + nasal polyposis. Pathophysiology: COX-1 inhibition → shunting to lipoxygenase pathway → excess cysteinyl leukotrienes → eosinophilic inflammation. Polyps are bilateral, eosinophil-rich, and Type 2 inflammatory. Unilateral polyp in an adult = EXCLUDE antrochoanal polyp or malignancy. Management: intranasal steroids first-line, short-course oral steroids for exacerbations, FESS if refractory. Aspirin desensitisation can be offered.",
+          'Temporal bone fracture + facial palsy: Immediate complete palsy or ENoG >90% degeneration → surgical exploration. Delayed/incomplete palsy → conservative (steroids, observation). ENoG is most useful at 3–14 days post-injury. Polyphasic potentials on EMG = regeneration = good prognosis.',
+        isDemo: true,
         isActive: true,
       },
       {
         category: 'MRCS Part A',
         subCategory: 'ENT',
-        source: "Bailey's ENT MCQ BOOK",
-        chapter: 'Ch 5: Trauma',
-        stem: 'A 28-year-old male is brought to the emergency department after being struck in the face during an assault. He has bilateral periorbital ecchymosis, subconjunctival haemorrhage with no posterior limit, CSF rhinorrhoea from the left nostril, and anosmia. CT head shows a fracture through the cribriform plate and frontal sinus posterior wall. Which of the following structures is most at risk of injury at the cribriform plate?',
+        source: 'Dhingra',
+        chapter: 'Head & Neck',
+        stem: 'A 55-year-old male presents with an ulceroproliferative lesion involving the hard palate. Biopsy confirms squamous cell carcinoma. Which of the following is the most appropriate investigation to assess the extent of the disease?',
         options: [
-          'Optic nerve (CN II) as it passes through the optic canal',
-          'Olfactory nerve filaments (CN I) passing through the cribriform foramina',
-          'Maxillary division of the trigeminal nerve (CN V2)',
-          'Trochlear nerve (CN IV) within the superior orbital fissure',
-          'Frontal branch of the superficial temporal artery',
+          'Orthopantomogram (OPG)',
+          'MRI of face',
+          'Contrast-enhanced CT scan of maxilla',
+          'PET-CT scan',
         ],
-        correctAnswer: 'Olfactory nerve filaments (CN I) passing through the cribriform foramina',
+        correctAnswer: 'Contrast-enhanced CT scan of maxilla',
         rationale:
-          "The cribriform plate of the ethmoid bone is perforated by ~20 olfactory nerve filaments (fila olfactoria) that pass from the nasal mucosa into the anterior cranial fossa to synapse in the olfactory bulb. Fractures through the cribriform plate directly shear these delicate filaments, causing anosmia — which this patient has. The fracture also tears the overlying dura and arachnoid, resulting in CSF rhinorrhoea. The optic nerve passes through the optic canal in the lesser wing of the sphenoid, which is posterior and lateral to the cribriform plate. CN V2 exits via the foramen rotundum. CN IV traverses the superior orbital fissure. The superficial temporal artery is an extracranial structure and is not related to the anterior skull base.",
+          'For squamous cell carcinoma of the hard palate, contrast-enhanced CT of the maxilla is the investigation of choice to assess local extent including bony involvement. OPG is useful for dental assessment but does not adequately delineate soft tissue or bony invasion of the palate. MRI is better for soft tissue detail but CT is preferred for bony assessment of the maxilla. PET-CT is used for staging distant metastases or unknown primaries, not for local extent assessment.',
         highYieldSummary:
-          "Anterior skull base fracture signs: bilateral periorbital ecchymosis (raccoon eyes), subconjunctival haemorrhage with no posterior limit, CSF rhinorrhoea, anosmia. Cribriform plate fractures shear CN I filaments (anosmia) and tear dura (CSF leak). CSF rhinorrhoea: test with β2-transferrin (most specific) or tau protein. Do NOT pack the nose or pass NG tube through the nose. Most CSF leaks resolve with conservative management (head elevation, bed rest, stool softeners). Persistent leak >7 days → consider surgical repair.",
+          'Hard palate SCC: CECT maxilla is the investigation of choice for local extent (bone erosion, antral invasion). MRI is complementary for perineural spread and soft tissue margins. PET-CT for distant staging. Treatment: infrastructure maxillectomy ± post-op radiotherapy.',
+        isDemo: true,
+        isActive: true,
+      },
+      {
+        category: 'MRCS Part A',
+        subCategory: 'ENT',
+        source: 'Dhingra',
+        chapter: 'Head & Neck',
+        stem: 'The most common benign tumor of the parotid gland overall is:',
+        options: [
+          'Hemangioma',
+          'Pleomorphic adenoma',
+          'Warthin tumor',
+          'Mucoepidermoid tumor',
+        ],
+        correctAnswer: 'Pleomorphic adenoma',
+        rationale:
+          'Pleomorphic adenoma (mixed tumor) is the most common benign tumor of the parotid gland overall, accounting for ~60–70% of all parotid tumors. It arises from both epithelial and myoepithelial elements. Warthin tumor (papillary cystadenoma lymphomatosum) is the second most common benign parotid tumor. Mucoepidermoid carcinoma is the most common malignant salivary gland tumor. Hemangioma is the most common parotid tumor in infants but not the most common overall.',
+        highYieldSummary:
+          'Most common benign parotid tumor overall: pleomorphic adenoma. Most common in infants: hemangioma (only when age is specifically mentioned). Most common malignant salivary tumor: mucoepidermoid carcinoma. Pleomorphic adenoma: treated by superficial parotidectomy. Can undergo malignant transformation → carcinoma ex pleomorphic adenoma.',
+        isDemo: true,
+        isActive: true,
+      },
+      {
+        category: 'MRCS Part A',
+        subCategory: 'ENT',
+        source: 'Scott Brown',
+        chapter: 'Laryngology',
+        stem: 'A patient with vocal cord paralysis undergoes laryngeal EMG, which shows spontaneous firing but no voluntary motor unit activity. This finding indicates:',
+        options: [
+          'No prognostic significance',
+          'EMG should be repeated',
+          'No chance of recovery',
+          '75% chance of recovery',
+          '50% chance of recovery',
+        ],
+        correctAnswer: 'No chance of recovery',
+        rationale:
+          'On laryngeal EMG, spontaneous activity (fibrillation potentials) without voluntary motor unit potentials indicates denervation with poor prognosis and essentially no likelihood of functional recovery. Fibrillation potentials represent spontaneous depolarisation of denervated muscle fibres. The absence of voluntary motor unit potentials means there is no intact neural connection to the muscle. Presence of voluntary or polyphasic potentials would suggest regeneration and a better prognosis.',
+        highYieldSummary:
+          'Laryngeal EMG interpretation: Fibrillations + no voluntary motor units = denervation = no recovery. Polyphasic potentials = regeneration = good prognosis. Normal motor units = neuropraxia = full recovery expected. EMG is most useful 2–6 weeks after onset of paralysis. Guides decision between observation vs. medialization thyroplasty.',
+        isDemo: true,
         isActive: true,
       },
     ];
@@ -114,4 +170,4 @@ const seedQuestions = async (req, res) => {
   }
 };
 
-module.exports = { getQuestions, seedQuestions };
+module.exports = { getQuestions, getDemoQuestions, seedQuestions };
