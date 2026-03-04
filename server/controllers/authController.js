@@ -30,8 +30,8 @@ const signup = async (req, res) => {
       token: generateToken(user._id),
     });
   } catch (error) {
-    console.error('Signup error:', error.message);
-    res.status(500).json({ message: 'Server error during signup.' });
+    console.error('Signup error:', error);
+    res.status(500).json({ message: 'Server error during signup.', error: error.message });
   }
 };
 
