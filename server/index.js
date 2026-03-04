@@ -61,6 +61,30 @@ app.get('/api/debug', async (req, res) => {
   res.json(checks);
 });
 
+// Test signup (remove after debugging)
+app.post('/api/test-signup', async (req, res) => {
+  try {
+    const User = require('./models/User');
+    const jwt = require('jsonwebtoken');
+    const { name, email, password } = req.body;
+    res.json({ step: 'parsed body', name, email, hasPassword: !!password });
+  } catch (e) {
+    res.status(500).json({ step: 'failed', error: e.message, stack: e.stack });
+  }
+});
+app.post('/api/test-signup2', async (req, res) => {
+  try {
+    const User = require('./models/User');
+    const jwt = require('jsonwebtoken');
+    const { name, email, password } = req.body;
+    const user = await User.create({ name, email: email + '.test', password });
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '30d' });
+    res.json({ step: 'complete', userId: user._id, token: token.substring(0, 20) + '...' });
+  } catch (e) {
+    res.status(500).json({ step: 'failed', error: e.message, stack: e.stack });
+  }
+});
+
 // API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/questions', questionRoutes);
